@@ -390,3 +390,50 @@ document.addEventListener('change', e => {
   if (e.target && e.target.type === 'radio') recalcAll();
 });
 recalcAll();
+
+
+/* ---- пресеты типа судна: прототипы и коэффициенты методики ----
+   Данные прототипов — таблица 1 методики проектирования транспортных судов
+   (многофункциональное сухогрузное судно и нефтеналивной танкер). */
+(function () {
+  const $ = id => document.getElementById(id);
+  const PRESETS = {
+    cargo: {
+      note: 'сухогруз: c = 2,16; δ = 1,09 − 1,68·Fr; h/B = 0,04; φ = 0,49',
+      f: { 'c3-D0': 21655, 'c3-L0': 146, 'c3-B0': 22.5, 'c3-T0': 7.75, 'c3-H0': 10.8,
+           'c3-Pst0': 3217, 'c3-Pob0': 1205, 'c3-Pseu0': 406, 'c3-Psez0': 616,
+           'c3-N0': 4400, 'c3-u0': 13, 'c3-R0': 11000,
+           'c3-Pgr': 13000, 'c3-u': 15.5, 'c3-R': 10000, 'c3-nek': 19, 'c3-A': 40, 'c3-Pinv': 30,
+           'p4-PE': 3585, 'p4-eta': 0.60 },
+    },
+    tank: {
+      note: 'танкер: c = 2,13; δ = 1,05 − 1,40·Fr; h/B = 0,06; φ = 0,50; первое приближение оценено по прототипу (D₁ = Ргр/μ, размерения аффинно)',
+      f: { 'c3-D0': 61760, 'c3-L0': 176, 'c3-B0': 32.2, 'c3-T0': 13.0, 'c3-H0': 17.6,
+           'c3-Pst0': 9033, 'c3-Pob0': 2091, 'c3-Pseu0': 730, 'c3-Psez0': 1839,
+           'c3-N0': 8680, 'c3-u0': 14.5, 'c3-R0': 19000,
+           'c3-Pgr': 40000, 'c3-u': 14.5, 'c3-R': 15000, 'c3-nek': 22, 'c3-A': 55, 'c3-Pinv': 20,
+           // первое приближение для танкера: D₁ = Ргр/μ по прототипу, размерения — аффинно
+           'c3-D1': 51840, 'c3-L1': 166.2, 'c3-B1': 30.4, 'c3-T1': 12.28, 'c3-H1': 16.62,
+           // третье приближение: буксировочная мощность по адмиралтейскому
+           // коэффициенту прототипа-танкера (Ca ≈ 549, η ≈ 0,70)
+           'p4-PE': 5400, 'p4-eta': 0.70 },
+    },
+  };
+  function apply(key) {
+    const p = PRESETS[key];
+    if (!p) return;
+    for (const [id, v] of Object.entries(p.f)) {
+      const el = $(id);
+      if (el) { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }
+    }
+    const n = $('pt-note');
+    if (n) n.textContent = p.note;
+    document.querySelectorAll('#pt-cargo,#pt-tank').forEach(b => b.classList.remove('on'));
+    const b = $(key === 'cargo' ? 'pt-cargo' : 'pt-tank');
+    if (b) b.classList.add('on');
+  }
+  if ($('pt-cargo')) $('pt-cargo').addEventListener('click', () => apply('cargo'));
+  if ($('pt-tank')) $('pt-tank').addEventListener('click', () => apply('tank'));
+  if ($('pt-note')) $('pt-note').textContent = PRESETS.cargo.note;
+  const b0 = $('pt-cargo'); if (b0) b0.classList.add('on');
+})();
