@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Решатель: первое приближение по судам-аналогам</title>
-<meta name="description" content="Живой расчёт первого приближения: по таблице судов-аналогов вычисляются измерители, затем водоизмещение, главные размерения и мощность нового судна; плюс уравнение нагрузки с дедвейтом.">
+<title>Решатель: три приближения к проекту судна</title>
+<meta name="description" content="Живой расчёт трёх приближений: первое — по судам-аналогам (измерители, водоизмещение, размерения, мощность), второе — уточнение массы корпуса с коэффициентом Нормана и аффинным преобразованием, третье — мощность по сопротивлению и выбор двигателя из каталога.">
 <link rel="stylesheet" href="assets/style.css">
 <style>
   table.an { width: 100%; border-collapse: collapse; font: 14px system-ui; }
@@ -16,17 +16,105 @@
   .proj-in label { display: flex; align-items: center; gap: 7px; }
   .proj-in input { width: 90px; font: 14px ui-monospace, monospace;
     border: 1px solid #d8d6cf; border-radius: 6px; padding: 4px 6px; }
+  /* длинные выключные формулы прокручиваются внутри себя, не растягивая страницу */
+  .katex-display { overflow-x: auto; overflow-y: hidden; padding: 3px 2px; }
 </style>
 </head>
 <body>
 <main class="wrap">
-  <h1>Решатель: первое приближение по судам-аналогам</h1>
-  <p class="lead">Первый виток <a href="t-basics">спирали проектирования</a>:
-  по трём судам-аналогам снимаем <b>измерители</b> — коэффициент утилизации
-  водоизмещения μ, относительную длину c, отношение L/B и адмиралтейский
-  коэффициент C<sub>a</sub>, — а затем по заданным грузоподъёмности и скорости
-  получаем водоизмещение, главные размерения и мощность нового судна.
-  Таблица аналогов редактируемая: подставьте свои суда — всё пересчитается.</p>
+  <h1>Решатель: три приближения к проекту судна</h1>
+  <p class="lead">Живая <a href="t-basics">спираль проектирования</a> в три витка:
+  сначала по судам-аналогам снимаем <b>измерители</b> и получаем первое
+  приближение — водоизмещение, размерения и мощность; затем уточняем массу
+  корпуса, корректируем водоизмещение по <b>Норману</b> и перестраиваем
+  размерения аффинным преобразованием; наконец, по буксировочному
+  сопротивлению выбираем двигатель из каталога и утверждаем эскизные
+  характеристики. Все таблицы и поля редактируемые — всё пересчитывается.</p>
+
+  <div class="panel">
+    <div style="overflow-x:auto"><svg viewBox="0 0 950 252" style="min-width:820px;width:100%;display:block" role="img"
+      aria-label="Схема трёх приближений: нагрузка, размерения, уточнение корпуса, Норман, аффинное преобразование, сопротивление, двигатель, итог">
+      <defs>
+        <marker id="sp-arr" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto">
+          <path d="M0,0 L9,4 L0,8 z" fill="#3a3a42"/></marker>
+      </defs>
+      <g font-family="system-ui,sans-serif">
+        <!-- I приближение -->
+        <g>
+          <rect x="20" y="40" width="210" height="62" rx="10" fill="#eef3ff" stroke="#c9d6f2"/>
+          <text x="125" y="65" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1a1a1e">Уравнение нагрузки</text>
+          <text x="125" y="84" text-anchor="middle" font-size="12" fill="#6b6b74">D₁ из измерителей масс</text>
+          <text x="218" y="55" text-anchor="end" font-size="11" font-weight="700" fill="#2b4fa0">I</text>
+        </g>
+        <g>
+          <rect x="250" y="40" width="210" height="62" rx="10" fill="#eef3ff" stroke="#c9d6f2"/>
+          <text x="355" y="65" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1a1a1e">Главные размерения</text>
+          <text x="355" y="84" text-anchor="middle" font-size="12" fill="#6b6b74">L₁, B₁, T₁, H₁, δ</text>
+          <text x="448" y="55" text-anchor="end" font-size="11" font-weight="700" fill="#2b4fa0">I</text>
+        </g>
+        <!-- II приближение -->
+        <g>
+          <rect x="480" y="40" width="210" height="62" rx="10" fill="#fbf7ea" stroke="#e7dcb8"/>
+          <text x="585" y="65" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1a1a1e">Уточнение корпуса</text>
+          <text x="585" y="84" text-anchor="middle" font-size="12" fill="#6b6b74">Pст + Pоб по gст, gоб</text>
+          <text x="678" y="55" text-anchor="end" font-size="11" font-weight="700" fill="#8a6d1a">II</text>
+        </g>
+        <g>
+          <rect x="710" y="40" width="210" height="62" rx="10" fill="#fbf7ea" stroke="#e7dcb8"/>
+          <text x="815" y="65" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1a1a1e">Коэффициент Нормана</text>
+          <text x="815" y="84" text-anchor="middle" font-size="12" fill="#6b6b74">ηн → dD, D₂ = D₁ + dD</text>
+          <text x="908" y="55" text-anchor="end" font-size="11" font-weight="700" fill="#8a6d1a">II</text>
+        </g>
+        <g>
+          <rect x="710" y="158" width="210" height="62" rx="10" fill="#fbf7ea" stroke="#e7dcb8"/>
+          <text x="815" y="183" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1a1a1e">Аффинное подобие</text>
+          <text x="815" y="202" text-anchor="middle" font-size="12" fill="#6b6b74">λ = ∛(D₂/D₁) → L₂, B₂, T₂, H₂</text>
+          <text x="908" y="173" text-anchor="end" font-size="11" font-weight="700" fill="#8a6d1a">II</text>
+        </g>
+        <!-- III приближение -->
+        <g>
+          <rect x="480" y="158" width="210" height="62" rx="10" fill="#e3f2e7" stroke="#bcdcc6"/>
+          <text x="585" y="183" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1a1a1e">Сопротивление</text>
+          <text x="585" y="202" text-anchor="middle" font-size="12" fill="#6b6b74">PE: Холтроп / Папмель</text>
+          <text x="678" y="173" text-anchor="end" font-size="11" font-weight="700" fill="#17632f">III</text>
+        </g>
+        <g>
+          <rect x="250" y="158" width="210" height="62" rx="10" fill="#e3f2e7" stroke="#bcdcc6"/>
+          <text x="355" y="183" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1a1a1e">Выбор двигателя</text>
+          <text x="355" y="202" text-anchor="middle" font-size="12" fill="#6b6b74">Nтр → Nгл из каталога</text>
+          <text x="448" y="173" text-anchor="end" font-size="11" font-weight="700" fill="#17632f">III</text>
+        </g>
+        <g>
+          <rect x="20" y="158" width="210" height="62" rx="10" fill="#fff" stroke="#2b4fa0" stroke-width="1.6"/>
+          <text x="125" y="183" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1a1a1e">Эскиз судна</text>
+          <text x="125" y="202" text-anchor="middle" font-size="12" fill="#6b6b74">D₃, L×B×T×H, Nгл, DWT</text>
+          <text x="218" y="173" text-anchor="end" font-size="11" font-weight="700" fill="#17632f">III</text>
+        </g>
+        <!-- стрелки цепочки -->
+        <g stroke="#3a3a42" stroke-width="1.4" fill="none" marker-end="url(#sp-arr)">
+          <line x1="230" y1="71" x2="248" y2="71"/>
+          <line x1="460" y1="71" x2="478" y2="71"/>
+          <line x1="690" y1="71" x2="708" y2="71"/>
+          <line x1="815" y1="102" x2="815" y2="156"/>
+          <line x1="710" y1="189" x2="692" y2="189"/>
+          <line x1="480" y1="189" x2="462" y2="189"/>
+          <line x1="250" y1="189" x2="232" y2="189"/>
+        </g>
+        <!-- виток спирали: возврат на уточнение -->
+        <path d="M 745 158 C 725 126, 690 112, 655 105" fill="none" stroke="#9a9aa2"
+          stroke-width="1.2" stroke-dasharray="5 4" marker-end="url(#sp-arr)"/>
+        <text x="740" y="132" font-size="11.5" fill="#6b6b74">итерации, пока |A − D| &gt; 0,5·Pзв</text>
+        <text x="20" y="244" font-size="12" fill="#6b6b74">Цвет блока — номер приближения:
+          <tspan font-weight="700" fill="#2b4fa0">I</tspan> аналоги и размерения,
+          <tspan font-weight="700" fill="#8a6d1a">II</tspan> уточнение массы корпуса,
+          <tspan font-weight="700" fill="#17632f">III</tspan> сопротивление и двигатель.</text>
+      </g>
+    </svg></div>
+    <div class="caption">Три витка спирали проектирования: каждое следующее
+    приближение уточняет результат предыдущего, а пунктирная стрелка —
+    внутренние итерации второго приближения (пересчёт массы корпуса до
+    сходимости нагрузки и водоизмещения).</div>
+  </div>
 
   <h2>Шаг 1. Суда-аналоги</h2>
   <div class="panel">
@@ -95,14 +183,154 @@
     что судно «поднимает», в отличие от водоизмещения порожнём.</p>
   </div>
 
+  <h2>Второе приближение: уточнение массы корпуса</h2>
+  <p>Дальше решатель воспроизводит цепочку курсового проекта по
+  «Проектированию судов»: сухогруз с Р<sub>гр</sub> = 13 000 т,
+  u = 15,5 уз, R = 10 000 миль и судно-прототип с D₀ = 21 655 т.
+  Первое приближение (уравнение нагрузки + система
+  плавучесть–остойчивость–вместимость) уже дало D₁ и размерения — их
+  результаты внесены в поля ниже и редактируемы. Во втором приближении
+  масса корпуса с оборудованием считается не измерителем p<sub>коб</sub>·D,
+  а <b>по формулам с измерителями прототипа</b> g<sub>ст</sub> и
+  g<sub>об</sub>; расхождение нагрузки и водоизмещения гасится
+  дифференциальным уравнением масс в форме Нормана, а размерения
+  перестраиваются аффинным преобразованием.</p>
+  <div class="panel">
+    <h3 style="margin-top:0">Судно-прототип</h3>
+    <div class="proj-in">
+      <label>D₀, т <input type="number" step="any" id="c3-D0" value="21655"></label>
+      <label>L₀, м <input type="number" step="any" id="c3-L0" value="146"></label>
+      <label>B₀, м <input type="number" step="any" id="c3-B0" value="22.5"></label>
+      <label>T₀, м <input type="number" step="any" id="c3-T0" value="7.75"></label>
+      <label>H₀, м <input type="number" step="any" id="c3-H0" value="10.8"></label>
+      <label>Р<sub>ст0</sub>, т <input type="number" step="any" id="c3-Pst0" value="3217"></label>
+      <label>Р<sub>об0</sub>, т <input type="number" step="any" id="c3-Pob0" value="1205"></label>
+      <label>Р<sub>сэу0</sub>, т <input type="number" step="any" id="c3-Pseu0" value="406"></label>
+      <label>Р<sub>сэз0</sub>, т <input type="number" step="any" id="c3-Psez0" value="616"></label>
+      <label>N₀, кВт <input type="number" step="any" id="c3-N0" value="4400"></label>
+      <label>u₀, уз <input type="number" step="any" id="c3-u0" value="13"></label>
+      <label>R₀, миль <input type="number" step="any" id="c3-R0" value="11000"></label>
+    </div>
+    <h3>Задание на проект</h3>
+    <div class="proj-in">
+      <label>Р<sub>гр</sub>, т <input type="number" step="any" id="c3-Pgr" value="13000"></label>
+      <label>u, уз <input type="number" step="any" id="c3-u" value="15.5"></label>
+      <label>R, миль <input type="number" step="any" id="c3-R" value="10000"></label>
+      <label>n<sub>эк</sub>, чел <input type="number" step="any" id="c3-nek" value="19"></label>
+      <label>A, сут <input type="number" step="any" id="c3-A" value="40"></label>
+      <label>Р<sub>инв</sub>, т <input type="number" step="any" id="c3-Pinv" value="30"></label>
+    </div>
+    <h3>Результаты первого приближения</h3>
+    <div class="proj-in">
+      <label>D₁, т <input type="number" step="any" id="c3-D1" value="18304.9"></label>
+      <label>L₁, м <input type="number" step="any" id="c3-L1" value="140.537"></label>
+      <label>B₁, м <input type="number" step="any" id="c3-B1" value="22.928"></label>
+      <label>T₁, м <input type="number" step="any" id="c3-T1" value="7.561"></label>
+      <label>H₁, м <input type="number" step="any" id="c3-H1" value="13.03"></label>
+      <label>k <input type="number" step="any" id="c3-k" value="1.005"></label>
+      <label>ρ, т/м³ <input type="number" step="any" id="c3-rho" value="1.025"></label>
+      <label>p<sub>зв</sub> <input type="number" step="any" id="c3-pzv" value="0.005"></label>
+    </div>
+    <h3>Формулы</h3>
+    <p>Масса стального корпуса и масса оборудования — по измерителям
+    прототипа (кубический модуль в разной степени):</p>
+    $$P_{\text{ст}} = g_{\text{ст}}\,\delta^{1/3} L^{3/2} B \sqrt{H},
+      \qquad P_{\text{об}} = g_{\text{об}}\,(L B H)^{2/3}$$
+    $$g_{\text{ст}} = \frac{P_{\text{ст0}}}{\delta_0^{1/3} L_0^{3/2} B_0 \sqrt{H_0}},
+      \qquad g_{\text{об}} = \frac{P_{\text{об0}}}{(L_0 B_0 H_0)^{2/3}},
+      \qquad \delta_0 = \frac{D_0}{\rho\, L_0 B_0 T_0}$$
+    <p>Если сумма нагрузки \(A_1\) разошлась с \(D_1\) больше чем на половину
+    запаса водоизмещения — корректировка по Норману и аффинное
+    преобразование размерений:</p>
+    $$\eta_{\text{н}} = \frac{1}{1 - \dfrac{P_{\text{коб}}}{D_1}
+      - \dfrac{2\,(P_{\text{сэу}} + P_{\text{сэз}})}{3 D_1}},
+      \qquad dD = \eta_{\text{н}}\, dP,
+      \qquad \lambda = \sqrt[3]{D_2 / D_1}$$
+    $$L_2 = \lambda L_1,\qquad B_2 = \lambda B_1,\qquad T_2 = \lambda T_1,
+      \qquad H_2 = H_1 / \lambda^2$$
+    <p class="small">Высота борта делится на λ², а не умножается на λ: при
+    «раздувании» корпуса в длину и ширину требуемая полная вместимость уже
+    обеспечена, и подпалубный объём сохраняют, опуская палубу.</p>
+    <h3>Решение по шагам</h3>
+    <div class="note tip" id="steps3"></div>
+    <p class="small">В рабочей книге курсового после первой корректировки
+    выполняется ещё одна итерация Нормана (D ≈ 19 257 т), а при утверждении
+    значения округляются до D = 19 376 т; решатель, как и основной текст
+    записки, останавливается на первой итерации — пунктирная стрелка на
+    схеме вверху показывает, где цикл замыкается.</p>
+  </div>
+
+  <h2>Третье приближение: сопротивление и выбор двигателя</h2>
+  <p>Мощность в первых двух приближениях оценивалась адмиралтейской
+  формулой. Теперь она уточняется по <b>буксировочному сопротивлению</b>:
+  в курсовом проекте R<sub>т</sub> = 450 кН посчитано по методу
+  Холтропа–Меннена внешним калькулятором (shiplab.hials.org), откуда
+  P<sub>E</sub> = R<sub>т</sub>·v = 3585 кВт. Решатель поддерживает два
+  режима: ввод готового P<sub>E</sub> и грубую оценку по
+  <b>формуле Папмеля</b>.</p>
+  <div class="panel">
+    <div class="proj-in" style="gap:10px 26px">
+      <label><input type="radio" name="p4-mode" value="pe" checked style="width:auto">
+        P<sub>E</sub> задано (Холтроп–Меннен)</label>
+      <label><input type="radio" name="p4-mode" value="papmel" style="width:auto">
+        оценка по Папмелю</label>
+    </div>
+    <div class="proj-in">
+      <label>P<sub>E</sub>, кВт <input type="number" step="any" id="p4-PE" value="3585"></label>
+      <label>c<sub>П</sub> <input type="number" step="any" id="p4-c" value="95"></label>
+      <label>η <input type="number" step="any" id="p4-eta" value="0.6"></label>
+      <label>запас, % <input type="number" step="any" id="p4-z" value="15"></label>
+      <label>шаг каталога, кВт <input type="number" step="any" id="p4-s" value="200"></label>
+    </div>
+    <h3>Формулы</h3>
+    <p>Оценка Папмеля (из рабочей книги «Теории корабля»; скорость u — в
+    узлах, V — объёмное водоизмещение, м³; для L &gt; 100 м приведённая
+    длина λ<sub>п</sub> и множитель x равны единице):</p>
+    $$P_E = 0{,}736\,\frac{V u^3}{c_{\text{П}}\, L}\cdot
+      \frac{\sqrt{\psi_{\text{к}}}}{\lambda_{\text{п}}}\,x,
+      \qquad \psi_{\text{к}} = \frac{10\,\delta B}{L},
+      \qquad \lambda_{\text{п}} = 0{,}7 + 0{,}3\sqrt{0{,}01 L}
+      \;\;(L < 100\ \text{м})$$
+    <p class="small">Коэффициент Папмеля \(c_{\text{П}}\) снимается с
+    диаграммы \(c(v',\psi_{\text{к}})\), где
+    \(v' = u\sqrt{\psi_{\text{к}}/L}\); в рабочей книге курса принято
+    \(c_{\text{П}} = 95\). Это честная прикидка «на клетчатой бумаге»:
+    полный расчёт Холтропа–Меннена планируется отдельным калькулятором в
+    каскаде справочника.</p>
+    <p>Дальше — цепочка выбора двигателя и уточнение масс энергетики
+    (измерители p<sub>сэу</sub>, p<sub>сэз</sub> — из второго блока):</p>
+    $$N_{\min} = \frac{P_E}{\eta},\qquad
+      N_{\text{тр}} = 1{,}15\, N_{\min},\qquad
+      N_{\text{гл}} = \left\lceil N_{\text{тр}} / 200 \right\rceil \cdot 200$$
+    $$P_{\text{сэу3}} = p_{\text{сэу}} N_{\text{гл}},\qquad
+      P_{\text{сэз3}} = p_{\text{сэз}} N_{\text{гл}} \frac{R}{u},\qquad
+      D_3 = D_2 + \eta_{\text{н}}\,(\Delta P_{\text{сэу}} + \Delta P_{\text{сэз}})$$
+    <h3>Решение по шагам</h3>
+    <div class="note tip" id="steps4"></div>
+    <p class="small">Общий пропульсивный коэффициент η взят по прототипу
+    (η₀ = 0,6); запас 15 % покрывает обрастание, ветер и волнение; каталог
+    двигателей в курсовом дискретен с шагом 200 кВт, поэтому N<sub>тр</sub>
+    округляется вверх до ближайшей ступени.</p>
+  </div>
+
+  <h2>Итог: эскизные характеристики судна</h2>
+  <div class="panel">
+    <div style="margin-bottom:8px" id="final-badge"></div>
+    <div class="tbl-scroll"><table class="an" id="final-table"></table></div>
+    <div class="caption">Сводка по результатам трёх приближений. В курсовом
+    проекте после второй итерации Нормана и округлений утверждено:
+    L = 143,2 м, B = 23,4 м, T = 7,7 м, H = 12,6 м, D = 19 376 т,
+    N<sub>гл</sub> = 7000 кВт — решатель останавливается на первой итерации,
+    поэтому водоизмещение здесь чуть выше утверждённого.</div>
+  </div>
+
   <h2>Что дальше</h2>
-  <p>Первое приближение — только вход в область решения: дальше уравнение
-  вместимости даст высоту борта, уравнение остойчивости проверит h, а
-  уточнение мощности пойдёт по модельным испытаниям
-  (см. <a href="t-stages">этапы проектирования</a>). Посадку и остойчивость
-  полученного судна можно исследовать на соседнем сайте
-  <a href="https://shadeswd.duckdns.org/shipstat/">«Статика корабля»</a>,
-  а деление на отсеки — в нашем расчёте
+  <p>Три приближения дают эскиз, но спираль продолжается: эскиз общего
+  расположения, теоретический чертёж и проверочные расчёты вместимости,
+  посадки и остойчивости (см. <a href="t-stages">этапы проектирования</a>).
+  Посадку и остойчивость полученного судна можно исследовать на соседнем
+  сайте <a href="https://shadeswd.duckdns.org/shipstat/">«Статика
+  корабля»</a>, а деление на отсеки — в нашем расчёте
   <a href="floodcalc">предельной длины отсека</a>.</p>
 </main>
 <script src="assets/site.js" data-root="./" data-page="solver"></script>
