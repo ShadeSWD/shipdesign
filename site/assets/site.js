@@ -8,6 +8,9 @@
     { href: '', key: 'index', title: 'Обзор' },
     { href: 'theory', key: 'theory', title: 'Теория' },
     { href: 'solver', key: 'solver', title: 'Главные элементы судна' },
+    { href: 'arrangement', key: 'arrangement', title: 'Общее расположение' },
+    { href: 'hullform', key: 'hullform', title: 'Теоретический чертёж' },
+    { href: 'checks', key: 'checks', title: 'Проверочные расчёты' },
     { href: 'floodcalc', key: 'floodcalc', title: 'Непотопляемость' },
     { href: 'sources', key: 'sources', title: 'Источники' },
   ];

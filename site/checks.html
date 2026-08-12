@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Проверочные расчёты: вместимость, нагрузка, посадка</title>
+<meta name="description" content="Проверочные расчёты курсового проекта: вместимость грузовых отсеков, балластных цистерн и цистерн запасов, полные таблицы нагрузки в грузу и в балласте с самопроверкой сумм, посадка и начальная остойчивость с боковым видом судна.">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  table.an { width: 100%; border-collapse: collapse; font: 13.5px system-ui; }
+  table.an th, table.an td { border: 1px solid #d8d6cf; padding: 4px 7px; text-align: center; }
+  table.an th { background: #eceae3; font-weight: 600; }
+  table.an td.l { text-align: left; }
+  .tbl-scroll { overflow-x: auto; }
+  .proj-in { display: flex; gap: 12px 22px; flex-wrap: wrap; align-items: center;
+    font: 14.5px system-ui; margin: 10px 0; }
+  .proj-in label { display: flex; align-items: center; gap: 7px; }
+  .proj-in input { width: 90px; font: 14px ui-monospace, monospace;
+    border: 1px solid #d8d6cf; border-radius: 6px; padding: 4px 6px; }
+  .katex-display { overflow-x: auto; overflow-y: hidden; padding: 3px 2px; }
+  svg.ship { width: 100%; height: auto; display: block; background: #fff;
+    border: 1px solid #d8d6cf; border-radius: 10px; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>Проверочные расчёты</h1>
+  <p class="lead">Эскиз <a href="arrangement">общего расположения</a> и
+  <a href="hullform">теоретический чертёж</a> готовы — пора проверить, что
+  судно действительно «сходится»: грузовые отсеки вмещают груз, балластные
+  цистерны — балласт, а таблица нагрузки даёт водоизмещение и центр тяжести,
+  при которых судно сидит без недопустимого дифферента и с достаточной
+  начальной остойчивостью. Все таблицы — из курсового проекта, суммы
+  пересчитываются в браузере построчно: это самопроверка сходимости записки.</p>
+
+  <h2>1. Проверка вместимости</h2>
+  <h3>Грузовые отсеки</h3>
+  <p>Требуемая теоретическая грузовместимость — с запасом на телесность
+  набора и укладку груза:</p>
+  $$W_{\text{гр}} = 1{,}1\,\mu_{\text{гр}}\,P_{\text{гр}}$$
+  <div class="panel">
+    <div class="proj-in">
+      <label>Р<sub>гр</sub>, т <input type="number" step="any" id="ck-Pgr" value="13000"></label>
+      <label>μ<sub>гр</sub>, м³/т <input type="number" step="any" id="ck-mu" value="1.55"></label>
+    </div>
+    <div class="tbl-scroll"><table class="an" id="ck-holds"></table></div>
+    <div class="note tip" id="ck-steps-wgr"></div>
+    <div class="caption">Фактические объёмы трюмов сняты с эпюры ёмкости,
+    построенной по строевой полного сечения (до верхней палубы) с учётом
+    комингсов люков.</div>
+  </div>
+
+  <h3>Балластные цистерны</h3>
+  <p>Требуемое количество балласта определяется из условий безопасного
+  балластного перехода — по осадкам, обеспечивающим погружение винта и
+  всхожесть на волну:</p>
+  $$T_{\text{бл.н}} = 0{,}025\,L, \qquad
+    d_{\text{в}} = 0{,}623\,T, \qquad
+    T_{\text{бл.к}} = 1{,}05\,d_{\text{в}}, \qquad
+    T_{\text{бл.ср}} = \tfrac{1}{2}\left(T_{\text{бл.н}} + T_{\text{бл.к}}\right)$$
+  $$D_{\text{бл}} = k\,\rho\,V_{\text{бл}}, \qquad
+    P_{\text{бл}} = D_{\text{бл}} - D_{\text{пор}} - 0{,}1\,P_{\text{зап}}, \qquad
+    W_{\text{бл}} = \frac{P_{\text{бл}}}{k_{\text{бл}}}$$
+  <div class="panel">
+    <div class="note tip" id="ck-steps-wbl"></div>
+    <p class="small">V<sub>бл</sub> = 10 260 м³ — объёмное водоизмещение при
+    средней балластной осадке, снятое с кривых элементов теоретического
+    чертежа; k<sub>бл</sub> = 0,98 — переходный коэффициент балластных
+    цистерн. Фактическая вместимость W<sub>бл</sub><sup>Ф</sup> = 8964 м³ —
+    сумма форпика, ахтерпика, цистерн двойного борта и двойного дна по
+    экспликации к эпюре ёмкости.</p>
+  </div>
+
+  <h3>Цистерны судовых энергетических запасов</h3>
+  <div class="panel">
+    <div class="note tip" id="ck-steps-wsez"></div>
+  </div>
+
+  <h2>2. Таблицы нагрузки</h2>
+  <p>Расчёт нагрузки выполняется минимум для двух вариантов: в полном грузу с
+  полными запасами и в балласте с 10 % запасов. Моменты в строках — как в
+  записке; суммирующие строки пересчитаны в браузере из строк таблицы, рядом —
+  сверка с итогами записки.</p>
+  <div class="panel">
+    <h3 style="margin-top:0">а) В полном грузу и с полными запасами</h3>
+    <div class="tbl-scroll"><table class="an" id="ck-load1"></table></div>
+    <div id="ck-load1-badges"></div>
+  </div>
+  <div class="panel">
+    <h3 style="margin-top:0">б) В балласте, 10 % запасов</h3>
+    <div class="tbl-scroll"><table class="an" id="ck-load2"></table></div>
+    <div id="ck-load2-badges"></div>
+    <p class="small" id="ck-load2-note"></p>
+  </div>
+
+  <h2>3. Посадка и начальная остойчивость</h2>
+  <p>По кривым элементов теоретического чертежа для найденного водоизмещения
+  снимаются осадка, координаты центра величины и метацентрические радиусы;
+  дальше — посадка и метацентрическая высота:</p>
+  $$h = z_c + r - z_g, \qquad
+    d = \frac{L\,(x_g - x_c)}{z_c + R - z_g}$$
+  $$T_{\text{н}} = T + \frac{L_{\text{н}}\,(x_g - x_c)}{z_c + R - z_g}, \qquad
+    T_{\text{к}} = T - \frac{L_{\text{к}}\,(x_g - x_c)}{z_c + R - z_g},
+    \qquad L_{\text{н,к}} = \frac{L}{2} \mp x_f$$
+  <div class="panel">
+    <div class="tbl-scroll"><table class="an" id="ck-trim"></table></div>
+    <div id="ck-trim-badges"></div>
+    <p class="small">Требуемая относительная метацентрическая высота
+    \(\bar{h} = h/B = 0{,}04\) была заложена в уравнение остойчивости ещё в
+    <a href="solver">первом приближении</a>; фактическая высота получилась с
+    большим запасом. Дифферент на корму в балласте улучшает погружение винта —
+    для балластного перехода это благоприятно.</p>
+  </div>
+
+  <h2>Посадка на боковом виде</h2>
+  <div class="panel">
+    <div style="overflow-x:auto"><svg id="ck-side" class="ship" style="min-width:900px" role="img"
+      aria-label="Боковой вид судна с грузовой и балластной ватерлиниями и положениями центра тяжести и центра величины"></svg></div>
+    <div class="caption">Боковой вид: сплошная синяя линия — посадка в полном
+    грузу (почти на ровный киль, x<sub>g</sub> ≈ x<sub>c</sub>), зелёный
+    пунктир — посадка в балласте с дифферентом на корму; флажки — абсциссы
+    центра тяжести x<sub>g</sub> и центра величины x<sub>c</sub> в грузу,
+    у форштевня — марки углубления.</div>
+  </div>
+
+  <h2>Что дальше</h2>
+  <p>Все проверки сошлись — виток спирали замкнулся: водоизмещение,
+  размерения, общее расположение и форма корпуса согласованы. Дальше по курсу —
+  деление на отсеки по условию непотопляемости: расчёт
+  <a href="floodcalc">предельной длины отсека</a>. Посадку и остойчивость
+  можно исследовать глубже на соседнем сайте
+  <a href="https://shadeswd.duckdns.org/shipstat/solver">«Статика корабля»</a>.</p>
+</main>
+<script src="assets/site.js" data-root="./" data-page="checks"></script>
+<script src="assets/shipdraw.js"></script>
+<script src="assets/checks.js"></script>
+</body>
+</html>
