@@ -89,8 +89,11 @@ window.SD = (function () {
         }, g);
         z0 += p.hb;
       });
-      // труба над МО (в корму с наклоном)
-      const fx = p.lap + 0.32 * p.lmo, fw = 3.6, fh = 4.6, ztop = z0 + p.hb;
+      // труба стоит на крыше верхнего яруса надстройки (не висит в воздухе)
+      const nT = p.tiers.length;
+      const topX0 = back + (nT - 1) * 1.6, topLen = p.tiers[nT - 1];
+      const fw = Math.min(3.6, Math.max(1.8, topLen * 0.4));
+      const fx = topX0 + (topLen - fw) / 2, fh = 4.6, ztop = z0 + p.hb;
       mk('path', {
         d: `M ${X(fx)} ${Y(z0)} L ${X(fx + 1.1)} ${Y(z0 + fh)} L ${X(fx + 1.1 + fw)} ${Y(z0 + fh)} L ${X(fx + fw)} ${Y(z0)} Z`,
         fill: '#d9e2f4', stroke: '#16161a', 'stroke-width': 1.3
@@ -283,16 +286,22 @@ window.SD = (function () {
       xn = xk;
     });
 
-    /* надстройка и шахта МО */
+    /* надстройка и шахта МО: симметрично относительно диаметральной плоскости
+       и в пределах корпуса (ширина по палубе в этом сечении) */
+    const supL = p.lyut ? p.lyut * 0.82 : 20;
+    const supX0 = Math.max(2.5, p.lap * 0.6);           // от кормового контура в нос
+    // полуширина надстройки — по фактической ширине палубы в её кормовом сечении
+    const supHalf = Math.min(0.36 * B, half(supX0) * 0.88);
     mk('rect', {
-      x: X(0.2), y: Yh(0.37 * B), width: (p.lyut ? p.lyut * 0.82 : 20) * s, height: 0.74 * B * s,
+      x: X(supX0), y: Yh(supHalf), width: supL * s, height: 2 * supHalf * s,
       rx: 7, fill: '#eef3ff', stroke: '#16161a', 'stroke-width': 1.2
     }, g);
-    txt(g, X((p.lyut ? p.lyut * 0.82 : 20) / 2), Yh(0.16 * B), 'надстройка', { 'font-size': 10.5, 'text-anchor': 'middle', fill: '#3a3a42', 'font-style': 'italic' });
-    const fx = p.lap + 0.32 * p.lmo;
-    mk('ellipse', { cx: X(fx + 2.3), cy: cy, rx: 2.3 * s, ry: 1.5 * s, fill: '#d9e2f4', stroke: '#16161a', 'stroke-width': 1.1 }, g);
-    txt(g, X(fx + 2.3), cy - 1.9 * s - 3, 'труба', { 'font-size': 9.5, 'text-anchor': 'middle', fill: '#6b6b74' });
-    txt(g, X(p.lap + p.lmo * 0.72), cy + 0.3 * B * s, 'МО', { 'font-size': 11, 'text-anchor': 'middle', fill: '#3a3a42', 'font-style': 'italic' });
+    txt(g, X(supX0 + supL / 2), cy - supHalf * s - 8, 'надстройка', { 'font-size': 10.5, 'text-anchor': 'middle', fill: '#3a3a42', 'font-style': 'italic' });
+    // труба — на диаметральной плоскости, над машинным отделением
+    const fx = supX0 + supL * 0.62;
+    mk('ellipse', { cx: X(fx), cy: cy, rx: 2.3 * s, ry: 1.5 * s, fill: '#d9e2f4', stroke: '#16161a', 'stroke-width': 1.1 }, g);
+    txt(g, X(fx), cy + 1.5 * s + 12, 'труба', { 'font-size': 9.5, 'text-anchor': 'middle', fill: '#6b6b74' });
+    txt(g, X(supX0 + supL + 3), cy + supHalf * s + 14, 'МО под надстройкой', { 'font-size': 10.5, 'text-anchor': 'middle', fill: '#3a3a42', 'font-style': 'italic' });
 
     /* перпендикуляры и ширина */
     [[0, 'КП'], [L, 'НП']].forEach(([x, t]) => {
@@ -302,7 +311,7 @@ window.SD = (function () {
     const xd = X(L * 0.47);
     mk('line', { x1: xd, y1: Yh(B / 2), x2: xd, y2: Yh(-B / 2), stroke: '#16161a', 'stroke-width': .9 }, g);
     [Yh(B / 2), Yh(-B / 2)].forEach(y => mk('line', { x1: xd - 4, y1: y, x2: xd + 4, y2: y, stroke: '#16161a', 'stroke-width': .9 }, g));
-    txt(g, xd + 6, cy - 6, `B = ${fmt1(B)} м`, { 'font-size': 10, fill: '#16161a', 'font-weight': 600 });
+    txt(g, xd, Yh(B / 2) - 6, `B = ${fmt1(B)} м`, { 'font-size': 10, fill: '#16161a', 'font-weight': 600, 'text-anchor': 'middle' });
   }
 
   return { drawSide, drawPlan, mk, txt };
