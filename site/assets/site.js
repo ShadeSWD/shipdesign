@@ -7,7 +7,7 @@
   const nav = [
     { href: '', key: 'index', title: 'Обзор' },
     { href: 'theory', key: 'theory', title: 'Теория' },
-    { href: 'solver', key: 'solver', title: 'Решатель' },
+    { href: 'solver', key: 'solver', title: 'Главные элементы судна' },
     { href: 'floodcalc', key: 'floodcalc', title: 'Непотопляемость' },
     { href: 'sources', key: 'sources', title: 'Источники' },
   ];
