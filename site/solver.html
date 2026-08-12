@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Решатель: первое приближение по судам-аналогам</title>
+<meta name="description" content="Живой расчёт первого приближения: по таблице судов-аналогов вычисляются измерители, затем водоизмещение, главные размерения и мощность нового судна; плюс уравнение нагрузки с дедвейтом.">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  table.an { width: 100%; border-collapse: collapse; font: 14px system-ui; }
+  table.an th, table.an td { border: 1px solid #d8d6cf; padding: 5px 7px; text-align: center; }
+  table.an th { background: #eceae3; font-weight: 600; }
+  .tbl-scroll { overflow-x: auto; }
+  .proj-in { display: flex; gap: 12px 22px; flex-wrap: wrap; align-items: center;
+    font: 14.5px system-ui; margin: 10px 0; }
+  .proj-in label { display: flex; align-items: center; gap: 7px; }
+  .proj-in input { width: 90px; font: 14px ui-monospace, monospace;
+    border: 1px solid #d8d6cf; border-radius: 6px; padding: 4px 6px; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>Решатель: первое приближение по судам-аналогам</h1>
+  <p class="lead">Первый виток <a href="t-basics">спирали проектирования</a>:
+  по трём судам-аналогам снимаем <b>измерители</b> — коэффициент утилизации
+  водоизмещения μ, относительную длину c, отношение L/B и адмиралтейский
+  коэффициент C<sub>a</sub>, — а затем по заданным грузоподъёмности и скорости
+  получаем водоизмещение, главные размерения и мощность нового судна.
+  Таблица аналогов редактируемая: подставьте свои суда — всё пересчитается.</p>
+
+  <h2>Шаг 1. Суда-аналоги</h2>
+  <div class="panel">
+    <div class="tbl-scroll"><table class="an" id="an1-table"></table></div>
+    <div class="caption">Данные трёх построенных судов, близких к проекту по
+    типу и назначению (D₀ — водоизмещение, Р<sub>гр0</sub> — грузоподъёмность,
+    δ₀ — коэффициент общей полноты, N₀ — мощность СЭУ).</div>
+  </div>
+
+  <h2>Шаг 2. Измерители аналогов и их средние</h2>
+  <div class="panel">
+    <div class="tbl-scroll"><table class="an" id="meas1-table"></table></div>
+    <div class="caption">По каждому аналогу считаются μ = Р<sub>гр</sub>/D,
+    относительная длина c = L/(v<sup>⅓</sup>D<sup>⅓</sup>), отношение L/B и
+    адмиралтейский коэффициент C<sub>a</sub> = D<sup>⅔</sup>v³/N; в расчёт
+    проекта идут средние (синяя строка). Устойчивость измерителей по выборке —
+    признак удачно подобранных аналогов.</div>
+  </div>
+
+  <h2>Шаг 3. Задание на проект и решение</h2>
+  <div class="panel">
+    <div class="proj-in">
+      <label>Р<sub>гр</sub>, т <input type="number" step="any" id="p1-P" value="12000"></label>
+      <label>v, уз <input type="number" step="any" id="p1-v" value="19"></label>
+      <label>ρ, т/м³ <input type="number" step="any" id="p1-rho" value="1.0"></label>
+    </div>
+    <p class="small">ρ — плотность воды в уравнении плавучести; в учебной
+    таблице принята ρ = 1,0 т/м³ (объёмное водоизмещение численно равно
+    массовому), для морской воды подставьте 1,025.</p>
+    <h3>Решение по шагам</h3>
+    <div class="note tip" id="steps1"></div>
+    <p class="small">Порядок решения: водоизмещение из уравнения нагрузки
+    (через μ), длина из условия ходкости (через относительную длину c),
+    ширина из характерного L/B, осадка из уравнения плавучести
+    D = ρ·δ·L·B·T, мощность по адмиралтейской формуле. Высота борта H на этом
+    шаге ещё не определяется — она придёт из уравнения вместимости на
+    следующем витке спирали.</p>
+  </div>
+
+  <h2>Уравнение нагрузки: дедвейт и статьи масс</h2>
+  <p>Вторая учебная задача: теперь по аналогам известна разбивка нагрузки —
+  корпус Р<sub>к</sub>, оборудование Р<sub>об</sub>, СЭУ Р<sub>сэу</sub>,
+  судовые энергетические запасы Р<sub>сэз</sub>, запас водоизмещения
+  Р<sub>зв</sub>, снабжение Р<sub>сн</sub> (см. <a href="t-load">главу 3</a> и
+  <a href="t-power">главу 4</a> теории). Измерители статей дают уравнение
+  нагрузки, а вместе с ним — запасы и дедвейт проекта.</p>
+  <div class="panel">
+    <h3 style="margin-top:0">Суда-аналоги с разбивкой нагрузки, т</h3>
+    <div class="tbl-scroll"><table class="an" id="an2-table"></table></div>
+    <h3>Измерители</h3>
+    <div class="tbl-scroll"><table class="an" id="meas2-table"></table></div>
+    <h3>Задание на проект</h3>
+    <div class="proj-in">
+      <label>Р<sub>гр</sub>, т <input type="number" step="any" id="p2-P" value="9600"></label>
+      <label>v, уз <input type="number" step="any" id="p2-v" value="11"></label>
+      <label>R, миль <input type="number" step="any" id="p2-R" value="8000"></label>
+      <label>A, сут <input type="number" step="any" id="p2-A" value="21"></label>
+      <label>n<sub>эк</sub>, чел <input type="number" step="any" id="p2-n" value="18"></label>
+    </div>
+    <h3>Решение по шагам</h3>
+    <div class="note tip" id="steps2"></div>
+    <p class="small">Р<sub>сн</sub> собирается из норм
+    <a href="t-power">главы 4</a>: экипаж с багажом 120 кг/чел, пресная вода
+    150 кг/(чел·сут), провизия 3 кг/(чел·сут) на автономность A и ≈20 т
+    инвентарного снабжения. Дедвейт DWT = груз + запасы + снабжение — всё,
+    что судно «поднимает», в отличие от водоизмещения порожнём.</p>
+  </div>
+
+  <h2>Что дальше</h2>
+  <p>Первое приближение — только вход в область решения: дальше уравнение
+  вместимости даст высоту борта, уравнение остойчивости проверит h, а
+  уточнение мощности пойдёт по модельным испытаниям
+  (см. <a href="t-stages">этапы проектирования</a>). Посадку и остойчивость
+  полученного судна можно исследовать на соседнем сайте
+  <a href="https://shadeswd.duckdns.org/shipstat/">«Статика корабля»</a>,
+  а деление на отсеки — в нашем расчёте
+  <a href="floodcalc">предельной длины отсека</a>.</p>
+</main>
+<script src="assets/site.js" data-root="./" data-page="solver"></script>
+<script src="assets/design.js"></script>
+</body>
+</html>
