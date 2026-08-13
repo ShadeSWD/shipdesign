@@ -209,6 +209,19 @@
       <button type="button" class="btn" id="pt-tank">нефтеналивной танкер</button>
       <span class="small" id="pt-note"></span>
     </div>
+    <div class="controls" style="margin-bottom:8px">
+      <label class="small" for="proto-bank">прототип из банка судов:</label>
+      <select id="proto-bank" style="font:14px system-ui;padding:4px 6px;max-width:100%">
+        <option value="">— загрузка банка судов… —</option>
+      </select>
+    </div>
+    <p class="small" id="proto-bank-note" style="display:none;margin:0 0 8px"></p>
+    <p class="small" style="margin:0 0 8px">Банк — шестнадцать оцифрованных
+    учебных вариантов судов справочника кластера
+    (<a href="https://shadeswd.duckdns.org/ref/ships">суда-прототипы</a>):
+    выбор судна подставляет в поля прототипа его водоизмещение и главные
+    размерения. Значения по умолчанию и пресеты типов судна остаются
+    прежними — банк только добавляет возможность выбрать реальный прототип.</p>
     <div class="proj-in">
       <label>D₀, т <input type="number" step="any" id="c3-D0" value="21655"></label>
       <label>L₀, м <input type="number" step="any" id="c3-L0" value="146"></label>
@@ -351,5 +364,6 @@
 </main>
 <script src="assets/ship-state.js"></script>
 <script src="assets/design.js"></script>
+<script src="assets/proto-bank.js"></script>
 </body>
 </html>
