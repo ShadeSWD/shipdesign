@@ -458,7 +458,7 @@ function renderFinal() {
   /* сохраняем проект целиком — эскиз, теоретический чертёж и проверки
      считаются по этим же числам (сквозной расчёт) */
   if (window.ShipState) {
-    const type = document.getElementById('pt-tank') && document.getElementById('pt-tank').classList.contains('on')
+    const type = window.SHIP_TYPE === 'tank'
       ? { type: 'tank', typeName: 'нефтеналивной танкер' }
       : { type: 'cargo', typeName: 'многофункциональное сухогрузное судно' };
     window.ShipState.save({
@@ -511,7 +511,8 @@ recalcAll();
   function apply(key) {
     const p = PRESETS[key];
     if (!p) return;
-    window.FIXED_N = null;   // новый проект — двигатель ещё не выбран
+    window.FIXED_N = null;      // новый проект — двигатель ещё не выбран
+    window.SHIP_TYPE = key;     // тип фиксируем до пересчёта, чтобы он попал в проект
     for (const [id, v] of Object.entries(p.f)) {
       const el = $(id);
       if (el) { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }

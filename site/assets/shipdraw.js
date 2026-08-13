@@ -108,8 +108,26 @@ window.SD = (function () {
       mk('line', { x1: X(mxx), y1: Y(zd(mxx) + p.hb + 5), x2: X(mxx + 2.6), y2: Y(zd(mxx) + p.hb + 4.2), stroke: '#16161a', 'stroke-width': 1 }, g);
     }
 
-    /* комингсы люков на главной палубе */
-    if (p.holds && p.hk) {
+    /* комингсы люков (сухогруз) или палубный трубопровод с манифольдом (танкер) */
+    if (p.type === 'tank' && p.holds) {
+      let xt = L - p.lfp;
+      const zdeck = zd(0) + p.hb;
+      // магистраль по палубе
+      mk('line', { x1: X(p.lap + p.lmo), y1: Y(zdeck + 0.5), x2: X(L - p.lfp), y2: Y(zdeck + 0.5),
+        stroke: '#155e75', 'stroke-width': 2 }, g);
+      // манифольд в средней части
+      const xm = (p.lap + p.lmo + L - p.lfp) / 2;
+      mk('rect', { x: X(xm - 2), y: Y(zdeck + 2.2), width: 4 * s, height: 1.7 * s,
+        fill: '#eef3ff', stroke: '#16161a', 'stroke-width': 1.2 }, g);
+      txt(g, X(xm), Y(zdeck + 2.6), 'манифольд', { 'font-size': 9.5, 'text-anchor': 'middle', fill: '#3a3a42' });
+      // горловины танков
+      (p.holds || []).forEach(lh => {
+        const xk = xt - lh;
+        mk('rect', { x: X(xk + 0.45 * lh), y: Y(zdeck + 0.9), width: 1.6 * s, height: 0.9 * s,
+          fill: '#fff', stroke: '#16161a', 'stroke-width': 1 }, g);
+        xt = xk;
+      });
+    } else if (p.holds && p.hk) {
       let xn = L - p.lfp; // носовая граница трюма 1
       p.holds.forEach(lh => {
         const xk = xn - lh;
@@ -197,7 +215,10 @@ window.SD = (function () {
       dim(0, xap, 30, `lап ${fmt1(p.lap)}`);
       dim(xr, xr + p.lmo, 30, `МО ${fmt1(p.lmo)}`); xr += p.lmo;
       const rev = (p.holds || []).slice().reverse();
-      rev.forEach((lh, i) => { dim(xr, xr + lh, 30, `трюм ${p.holds.length - i} · ${fmt1(lh)}`); xr += lh; });
+      rev.forEach((lh, i) => {
+        dim(xr, xr + lh, 30, `${p.type === 'tank' ? 'танк' : 'трюм'} ${p.holds.length - i} · ${fmt1(lh)}`);
+        xr += lh;
+      });
       dim(xfp, L, 30, `lфп ${fmt1(p.lfp)}`);
       dim(0, L, 52, `L = ${fmt1(L)} м (между перпендикулярами)`);
       // вертикальные размеры у форштевня
@@ -217,7 +238,10 @@ window.SD = (function () {
     const lbl = (x, sText) => txt(g, X(x), Y(0.55 * T) + 4, sText, { 'font-size': 10.5, 'text-anchor': 'middle', fill: '#3a3a42', 'font-style': 'italic' });
     lbl(xap + p.lmo / 2, 'МО');
     let xh = xap + p.lmo;
-    (p.holds || []).slice().reverse().forEach((lh, i, arr) => { lbl(xh + lh / 2, `трюм ${arr.length - i}`); xh += lh; });
+    (p.holds || []).slice().reverse().forEach((lh, i, arr) => {
+      lbl(xh + lh / 2, p.type === 'tank' ? `танк ${arr.length - i}` : `трюм ${arr.length - i}`);
+      xh += lh;
+    });
     txt(g, X(L - p.lfp / 2) - 4, Y(0.72 * T), 'форпик', { 'font-size': 9.5, 'text-anchor': 'middle', fill: '#3a3a42', 'font-style': 'italic', transform: `rotate(-70 ${X(L - p.lfp / 2) - 4} ${Y(0.72 * T)})` });
     txt(g, X(p.lap * 0.62), Y(0.9 * T), 'ахтерпик', { 'font-size': 9.5, 'text-anchor': 'middle', fill: '#3a3a42', 'font-style': 'italic', transform: `rotate(-70 ${X(p.lap * 0.62)} ${Y(0.9 * T)})` });
     /* перпендикуляры */
@@ -279,13 +303,38 @@ window.SD = (function () {
     bh.push(xfp);
     bh.forEach(x => mk('line', { x1: X(x), y1: Yh(half(x)), x2: X(x), y2: Yh(-half(x)), stroke: '#9c2b22', 'stroke-width': 1.1, 'stroke-dasharray': '4 3' }, g));
 
-    /* люки трюмов: контур повторяет обводы — полуширота люка в каждом сечении
-       не больше ширины палубы за вычетом прохода у борта */
+    /* грузовая зона: у танкера — танки с продольной переборкой по ДП и
+       небольшими горловинами, у сухогруза — грузовые люки по обводам */
     let xn = xfp;
     const gap = Math.max(0.8, p.bdb || 1.6);        // проход между комингсом и бортом
+    const isTank = p.type === 'tank';
+    if (isTank) {
+      // продольная переборка по диаметральной плоскости грузовой зоны
+      mk('line', { x1: X(xmoN), y1: cy, x2: X(xfp), y2: cy, stroke: '#9c2b22', 'stroke-width': 1.6 }, g);
+      txt(g, X((xmoN + xfp) / 2), cy - 6, 'продольная переборка', { 'font-size': 10, 'text-anchor': 'middle', fill: '#9c2b22' });
+    }
     (p.holds || []).forEach((lh, i) => {
       const xk = xn - lh, c0 = xk + 0.1 * lh, cw = 0.8 * lh;
       const halfHatch = x => Math.max(0.6, Math.min(p.bk / 2, half(x) - gap));
+      if (isTank) {
+        // два танка (левый и правый борт) в пределах обводов
+        [1, -1].forEach(sg => {
+          const pts = [];
+          for (let x = xk + 0.04 * lh; x <= xk + 0.96 * lh; x += lh / 24)
+            pts.push([x, Math.max(0.5, half(x) - (p.bdb || 1.6) * 0.5)]);
+          let d3 = `M ${X(pts[0][0])} ${Yh(sg * 0.6)}`;
+          for (const [x, h] of pts) d3 += ` L ${X(x)} ${Yh(sg * h)}`;
+          d3 += ` L ${X(pts[pts.length - 1][0])} ${Yh(sg * 0.6)} Z`;
+          mk('path', { d: d3, fill: 'rgba(21,94,117,.07)', stroke: '#16161a', 'stroke-width': 1 }, g);
+          txt(g, X(xk + lh / 2), cy + sg * (half(xk + lh / 2) * 0.5) * s + 4,
+            `танк ${i + 1} ${sg > 0 ? 'лв' : 'пр'}`, { 'font-size': 10, 'text-anchor': 'middle', fill: '#3a3a42', 'font-style': 'italic' });
+          // горловина — ближе к переборке, чтобы не перекрывать подпись
+          mk('circle', { cx: X(xk + 0.18 * lh), cy: cy + sg * half(xk + 0.18 * lh) * 0.45 * s, r: 3.4,
+            fill: '#fff', stroke: '#16161a', 'stroke-width': 1 }, g);
+        });
+        xn = xk;
+        return;
+      }
       const pts = [];
       for (let x = c0; x <= c0 + cw + 1e-9; x += cw / 24) pts.push([x, halfHatch(x)]);
       let d2 = `M ${X(pts[0][0])} ${Yh(pts[0][1])}`;

@@ -135,10 +135,13 @@
     document.getElementById('ar-steps7').innerHTML = o.join('');
 
     /* --- чертежи --- */
+    const proj = window.ShipState ? window.ShipState.load() : null;
+    const isTank = !!(proj && proj.type === 'tank');
     const p = {
       L, B, T, H, lap, lmo, lfp, holds, hdd, bdb,
       lbak: lb, hb: 2.7, lyut: lyut - lks, tiers: [tierMid, tierTop],
       a, ar, hk, bk, dims: true, combs: true,
+      type: isTank ? 'tank' : 'cargo',
     };
     SD.drawSide(document.getElementById('ar-side'), p);
     SD.drawPlan(document.getElementById('ar-plan'), p);
@@ -150,11 +153,19 @@
     let x = lfp, sh = nFp;
     holds.forEach((lh, i) => {
       const sh2 = sh + Math.round(lh / a);
-      rows.push([`Трюм ${i + 1}${i === 0 ? ' (носовой)' : ''}`, x, x + lh, `${sh} – ${sh2}`, lh,
-        `${fmt(lh / ar)} рамных шпаций`]);
+      rows.push([isTank
+        ? `Грузовые танки ${i + 1} (левый и правый борт)${i === 0 ? ' — носовые' : ''}`
+        : `Трюм ${i + 1}${i === 0 ? ' (носовой)' : ''}`,
+        x, x + lh, `${sh} – ${sh2}`, lh, `${fmt(lh / ar)} рамных шпаций`]);
       x += lh; sh = sh2;
     });
     const shMo = sh + Math.round(lmo / a);
+    if (isTank) {
+      // у танкера между грузовой зоной и машинным отделением — насосное
+      // отделение с коффердамами (сухие отсеки, отделяющие груз от машин)
+      rows.push(['Насосное отделение и коффердамы', x, x + 0.5 * lmo,
+        `${sh} – ${sh + Math.round(0.5 * lmo / a)}`, 0.5 * lmo, 'сухие отсеки между грузом и машинами']);
+    }
     rows.push(['Машинное отделение', x, x + lmo, `${sh} – ${shMo}`, lmo, `${fmt(lmo / ar)} рамных шпаций`]);
     x += lmo;
     rows.push(['Ахтерпик (балласт)', x, L, `${shMo} – КП`, L - x, 'шпация 0,6 м']);
