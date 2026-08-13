@@ -4,9 +4,17 @@
   const me = document.currentScript;
   const root = (me && me.dataset.root) || './';
   const page = (me && me.dataset.page) || '';
+  const chapters = [
+    { href: 't-basics', title: '1. Методология проектирования' },
+    { href: 't-stages', title: '2. Стадии и документация' },
+    { href: 't-load', title: '3. Нагрузка масс и вместимость' },
+    { href: 't-form', title: '4. Форма корпуса' },
+    { href: 't-power', title: '5. Ходкость и энергетическая установка' },
+    { href: 't-econ', title: '6. Экономика проекта' },
+  ];
   const nav = [
     { href: '', key: 'index', title: 'Обзор' },
-    { href: 'theory', key: 'theory', title: 'Теория' },
+    { href: 'theory', key: 'theory', title: 'Теория', drop: chapters },
     { href: 'solver', key: 'solver', title: 'Главные элементы судна' },
     { href: 'arrangement', key: 'arrangement', title: 'Общее расположение' },
     { href: 'hullform', key: 'hullform', title: 'Теоретический чертёж' },
@@ -18,8 +26,13 @@
   header.className = 'site';
   header.innerHTML = `<div class="wrap">
     <a class="logo" href="${root}"><span style="font-size:24px;line-height:1">🚢</span><span>Проектирование судов</span></a>
-    <nav class="top">${nav.map(({ href, key, title }) =>
-      `<a href="${root}${href}" class="${page === key ? 'on' : ''}">${title}</a>`).join('')}</nav>
+    <nav class="top">${nav.map(({ href, key, title, drop }) => {
+      const link = `<a href="${root}${href}" class="${page === key ? 'on' : ''}">${title}</a>`;
+      if (!drop) return link;
+      const items = drop.map((c) =>
+        `<a href="${root}${c.href}">${c.title}</a>`).join('');
+      return `<span class="nav-drop">${link}<span class="drop">${items}</span></span>`;
+    }).join('')}</nav>
   </div>`;
   document.body.prepend(header);
   const footer = document.createElement('footer');
