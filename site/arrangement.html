@@ -187,8 +187,12 @@
   нагрузки и посадки. Деление на отсеки по условию непотопляемости
   проверяется в расчёте <a href="floodcalc">предельной длины отсека</a>.</p>
 </main>
+<script src="assets/ship-state.js"></script>
 <script src="assets/site.js" data-root="./" data-page="arrangement"></script>
 <script src="assets/shipdraw.js"></script>
 <script src="assets/arrange.js"></script>
+<script>
+if (window.ShipState) ShipState.apply({'ar-L':'L','ar-B':'B','ar-T':'T','ar-H':'H'});
+</script>
 </body>
 </html>

@@ -246,7 +246,9 @@ window.SD = (function () {
     const half = x => {
       const xs0 = 0.22 * L, xn0 = 0.70 * L, bowX = L + 1.2;
       if (x <= xs0) {
-        const v = Math.max(0, (x + 2.6) / (xs0 + 2.6));
+        // кормовой обвод: от ширины транца плавно к полной ширине палубы;
+        // функция одна и та же для обоих бортов — контур строго симметричен
+        const v = Math.max(0, Math.min(1, (x + 2.6) / (xs0 + 2.6)));
         return B / 2 * (0.34 + 0.66 * Math.pow(Math.sin(Math.PI / 2 * v), 1.25));
       }
       if (x >= xn0) {
@@ -258,7 +260,7 @@ window.SD = (function () {
     let d = `M ${X(-2.6)} ${Yh(half(-2.6))}`;
     for (let x = -2.6; x <= L + 1.2; x += L / 140) d += ` L ${X(x)} ${Yh(half(x))}`;
     for (let x = L + 1.2; x >= -2.6; x -= L / 140) d += ` L ${X(x)} ${Yh(-half(x))}`;
-    d += ' Z';
+    d += ' Z';   // замыкание по транцу — обе ветви симметричны относительно ЦЛ
     mk('path', { d, fill: '#f6f8fc', stroke: '#16161a', 'stroke-width': 1.6 }, g);
     /* ЦЛ */
     mk('line', { x1: X(-6), y1: cy, x2: X(L + 6), y2: cy, stroke: '#6b6b74', 'stroke-width': .7, 'stroke-dasharray': '12 4 2 4' }, g);
@@ -277,11 +279,20 @@ window.SD = (function () {
     bh.push(xfp);
     bh.forEach(x => mk('line', { x1: X(x), y1: Yh(half(x)), x2: X(x), y2: Yh(-half(x)), stroke: '#9c2b22', 'stroke-width': 1.1, 'stroke-dasharray': '4 3' }, g));
 
-    /* люки трюмов */
+    /* люки трюмов: контур повторяет обводы — полуширота люка в каждом сечении
+       не больше ширины палубы за вычетом прохода у борта */
     let xn = xfp;
+    const gap = Math.max(0.8, p.bdb || 1.6);        // проход между комингсом и бортом
     (p.holds || []).forEach((lh, i) => {
       const xk = xn - lh, c0 = xk + 0.1 * lh, cw = 0.8 * lh;
-      mk('rect', { x: X(c0), y: Yh(p.bk / 2), width: cw * s, height: p.bk * s, fill: '#fff', stroke: '#16161a', 'stroke-width': 1.15 }, g);
+      const halfHatch = x => Math.max(0.6, Math.min(p.bk / 2, half(x) - gap));
+      const pts = [];
+      for (let x = c0; x <= c0 + cw + 1e-9; x += cw / 24) pts.push([x, halfHatch(x)]);
+      let d2 = `M ${X(pts[0][0])} ${Yh(pts[0][1])}`;
+      for (const [x, h] of pts) d2 += ` L ${X(x)} ${Yh(h)}`;
+      for (let k = pts.length - 1; k >= 0; k--) d2 += ` L ${X(pts[k][0])} ${Yh(-pts[k][1])}`;
+      d2 += ' Z';
+      mk('path', { d: d2, fill: '#fff', stroke: '#16161a', 'stroke-width': 1.15 }, g);
       txt(g, X(c0 + cw / 2), cy + 4, `трюм ${i + 1}`, { 'font-size': 11, 'text-anchor': 'middle', fill: '#3a3a42', 'font-style': 'italic' });
       xn = xk;
     });
@@ -296,12 +307,12 @@ window.SD = (function () {
       x: X(supX0), y: Yh(supHalf), width: supL * s, height: 2 * supHalf * s,
       rx: 7, fill: '#eef3ff', stroke: '#16161a', 'stroke-width': 1.2
     }, g);
-    txt(g, X(supX0 + supL / 2), cy - supHalf * s - 8, 'надстройка', { 'font-size': 10.5, 'text-anchor': 'middle', fill: '#3a3a42', 'font-style': 'italic' });
+    txt(g, X(supX0 + supL / 2), cy - supHalf * s * 0.45, 'надстройка', { 'font-size': 10.5, 'text-anchor': 'middle', fill: '#3a3a42', 'font-style': 'italic' });
     // труба — на диаметральной плоскости, над машинным отделением
     const fx = supX0 + supL * 0.62;
     mk('ellipse', { cx: X(fx), cy: cy, rx: 2.3 * s, ry: 1.5 * s, fill: '#d9e2f4', stroke: '#16161a', 'stroke-width': 1.1 }, g);
-    txt(g, X(fx), cy + 1.5 * s + 12, 'труба', { 'font-size': 9.5, 'text-anchor': 'middle', fill: '#6b6b74' });
-    txt(g, X(supX0 + supL + 3), cy + supHalf * s + 14, 'МО под надстройкой', { 'font-size': 10.5, 'text-anchor': 'middle', fill: '#3a3a42', 'font-style': 'italic' });
+    txt(g, X(fx) + 2.6 * s + 6, cy + 4, 'труба', { 'font-size': 9.5, 'text-anchor': 'start', fill: '#6b6b74' });
+    txt(g, X(supX0 + supL / 2), cy + supHalf * s * 0.62, 'МО', { 'font-size': 10.5, 'text-anchor': 'middle', fill: '#3a3a42', 'font-style': 'italic' });
 
     /* перпендикуляры и ширина */
     [[0, 'КП'], [L, 'НП']].forEach(([x, t]) => {

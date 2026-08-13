@@ -131,8 +131,12 @@
   можно исследовать глубже на соседнем сайте
   <a href="https://shadeswd.duckdns.org/shipstat/solver">«Статика корабля»</a>.</p>
 </main>
+<script src="assets/ship-state.js"></script>
 <script src="assets/site.js" data-root="./" data-page="checks"></script>
 <script src="assets/shipdraw.js"></script>
 <script src="assets/checks.js"></script>
+<script>
+if (window.ShipState) ShipState.apply({});
+</script>
 </body>
 </html>

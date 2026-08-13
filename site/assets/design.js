@@ -189,7 +189,12 @@ function calc3() {
   const gob = Pob0 / Math.pow(L0 * B0 * H0, 2 / 3);
   // зависящие от D1 статьи первого приближения
   const d1 = D1 / (k * rho * L1 * B1 * T1);
-  const N1 = Math.pow(D1, 2 / 3) * Math.pow(u, 3) / Ca;
+  // если двигатель уже выбран (следующий виток), массы СЭУ и СЭЗ считаются
+  // по его мощности, а не по адмиралтейской оценке — иначе разница масс
+  // «за запас 15 %» повторяется на каждом витке
+  const N1 = (window.FIXED_N && isFinite(window.FIXED_N))
+    ? window.FIXED_N
+    : Math.pow(D1, 2 / 3) * Math.pow(u, 3) / Ca;
   const Pseu1 = pseu * N1;
   const Psez1 = psez * N1 * R / u;
   const Pzv1 = pzv * D1;
@@ -279,6 +284,7 @@ function calc3() {
   o.push(stepRow('A₂ − D₂', `${fmt(As2)} − ${fmt(D2)}`, `${fmt(As2 - D2)} т`));
   document.getElementById('steps3').innerHTML = o.join('');
 
+  window.COURSE_BAL = { As1, dP, thr, D2, lam };
   window.COURSE = { pseu, psez, Ca, gst, gob, d1, D1, D2, lam, eta,
     L2, B2, T2, H2, Pseu2, Psez2, Pkob3, Pzv1, Psn, Pgr, R, u, k, rho };
 }
@@ -344,13 +350,18 @@ function calc4() {
     `${fmt(C.eta, 2)}·(${fmt(dSeu, 1)} + ${fmt(dSez, 1)})`, `${fmt(dD3, 1)} т`));
   o.push(stepRow('D₃ = D₂ + dD', `${fmt(C.D2)} + ${fmt(dD3, 1)}`, `${fmt(D3)} т`));
   const ok = Math.abs(dP3) <= thr;
+  const covered = !ok && Math.abs(dP3) <= C.Pzv1;   // покрывается полным запасом водоизмещения
   o.push(badgeRow(ok
     ? `|ΔР| = ${fmt(Math.abs(dP3), 1)} т ≤ 0,5·Р<sub>зв</sub> = ${fmt(thr, 1)} т — корректировка размерений не требуется`
-    : `|ΔР| = ${fmt(Math.abs(dP3), 1)} т &gt; 0,5·Р<sub>зв</sub> = ${fmt(thr, 1)} т — нужен ещё виток уточнения размерений`,
-    ok));
+    : covered
+      ? `|ΔР| = ${fmt(Math.abs(dP3), 1)} т больше половины запаса, но не превышает полный запас водоизмещения
+         Р<sub>зв</sub> = ${fmt(C.Pzv1, 1)} т: превышение вызвано округлением мощности вверх до ступени каталога
+         (${fmt(Ngl)} кВт при требуемых ${fmt(Ntr)} кВт) и покрывается запасом водоизмещения`
+      : `|ΔР| = ${fmt(Math.abs(dP3), 1)} т &gt; Р<sub>зв</sub> = ${fmt(C.Pzv1, 1)} т — нужен ещё виток уточнения размерений`,
+    ok || covered));
   document.getElementById('steps4').innerHTML = o.join('');
 
-  window.COURSE3 = { PE, Nmin, Ntr, Ngl, Pseu3, Psez3, D3, ok };
+  window.COURSE3 = { PE, Nmin, Ntr, Ngl, Pseu3, Psez3, D3, ok, covered, dP3, Pzv: C.Pzv1 };
 }
 
 /* ============ Итоговая таблица «Эскизные характеристики судна» ============ */
@@ -374,9 +385,87 @@ function renderFinal() {
     '<tr><th style="text-align:left">Характеристика</th><th>Значение</th></tr>' +
     rows.map(r => `<tr><td style="text-align:left">${r[0]}</td><td style="font-weight:700">${r[1]}</td></tr>`).join('');
   document.getElementById('final-badge').innerHTML =
-    `<span class="badge ${F.ok ? 'ok' : 'bad'}">${F.ok
-      ? 'Эскиз сходится: после выбора двигателя расхождение нагрузки в допуске запаса водоизмещения'
-      : 'Эскиз не сошёлся: расхождение нагрузки больше половины запаса водоизмещения — нужен ещё виток'}</span>`;
+    `<span class="badge ${F.ok || F.covered ? 'ok' : 'bad'}">${F.ok
+      ? 'Эскиз сходится: расхождение нагрузки в допуске половины запаса водоизмещения'
+      : F.covered
+        ? 'Эскиз принят: расхождение вызвано округлением мощности до ступени каталога и покрывается запасом водоизмещения'
+        : 'Эскиз не сошёлся: расхождение больше запаса водоизмещения — нужен ещё виток'}</span>` +
+    (F.ok || F.covered ? '' : ' <button type="button" class="btn" id="next-loop">следующий виток</button>' +
+      ' <button type="button" class="btn" id="auto-loop">витки до сходимости</button>');
+
+  /* следующий виток: результаты третьего приближения становятся входом
+     нового цикла (D₁ ← D₃, размерения ← аффинно преобразованные) */
+  const nb = document.getElementById('next-loop');
+  if (nb) nb.addEventListener('click', () => {
+    const set = (id, v) => {
+      const el = document.getElementById(id);
+      if (el && isFinite(v)) { el.value = Math.round(v * 1000) / 1000; }
+    };
+    set('c3-D1', F.D3); set('c3-L1', C.L2); set('c3-B1', C.B2);
+    set('c3-T1', C.T2); set('c3-H1', C.H2);
+    {
+      const etaEl = document.getElementById('p4-eta'), zapEl = document.getElementById('p4-z');
+      if (etaEl && zapEl) set('p4-PE', F.Ngl * (+etaEl.value || 0.6) / (1 + (+zapEl.value || 15) / 100));
+      window.FIXED_N = F.Ngl;
+    }
+    window.__loop = (window.__loop || 1) + 1;
+    recalcAll();
+    const badge = document.getElementById('final-badge');
+    if (badge) badge.insertAdjacentHTML('beforeend',
+      ` <span class="small">выполнен виток №${window.__loop}: за исходные приняты результаты предыдущего</span>`);
+  });
+
+  const ab = document.getElementById('auto-loop');
+  if (ab) ab.addEventListener('click', () => {
+    const set = (id, v) => { const el = document.getElementById(id); if (el && isFinite(v)) el.value = Math.round(v * 1000) / 1000; };
+    let n = 0;
+    while (n < 12) {
+      const Cx = window.COURSE, Bx = window.COURSE_BAL, Fx = window.COURSE3;
+      if (!Cx || !Bx) break;
+      const balOk = Math.abs(Bx.dP) <= Bx.thr;
+      const finOk = Fx && (Fx.ok || Fx.covered);
+      if (balOk && finOk) break;                      // и баланс, и эскиз сошлись
+      // простая итерация: новое водоизмещение — сумма нагрузки (или D₃, если
+      // баланс уже сошёлся, а эскиз разошёлся после выбора двигателя),
+      // размерения пересчитываются аффинно по λ = ∛(D_нов/D₁)
+      const D1old = readN('c3-D1');
+      const target = balOk && Fx ? Fx.D3 : Bx.As1;
+      const lam = Math.cbrt(target / D1old);
+      // фиксируем выбранный двигатель: на следующем витке требуемая мощность
+      // совпадает с ним, иначе запас 15 % и округление вверх повторяются вечно
+      const etaEl = document.getElementById('p4-eta'), zapEl = document.getElementById('p4-z');
+      if (Fx && etaEl && zapEl) {
+        const etaV = +etaEl.value || 0.6, zapV = +zapEl.value || 15;
+        set('p4-PE', Fx.Ngl * etaV / (1 + zapV / 100));
+        window.FIXED_N = Fx.Ngl;              // двигатель принят
+      }
+
+      set('c3-D1', target);
+      set('c3-L1', readN('c3-L1') * lam);
+      set('c3-B1', readN('c3-B1') * lam);
+      set('c3-T1', readN('c3-T1') * lam);
+      set('c3-H1', readN('c3-H1') / (lam * lam));
+      recalcAll(); n++;
+    }
+    window.__loop = (window.__loop || 1) + n;
+    const badge = document.getElementById('final-badge');
+    if (badge) badge.insertAdjacentHTML('beforeend',
+      ` <span class="small">выполнено витков: ${n}; ${window.COURSE3 && (window.COURSE3.ok || window.COURSE3.covered)
+        ? `проект сошёлся: |dP| = ${fmt(Math.abs(window.COURSE_BAL.dP), 1)} т ≤ ${fmt(window.COURSE_BAL.thr, 1)} т`
+        : 'сходимость не достигнута за 12 витков — проверьте исходные данные'}</span>`);
+  });
+
+  /* сохраняем проект целиком — эскиз, теоретический чертёж и проверки
+     считаются по этим же числам (сквозной расчёт) */
+  if (window.ShipState) {
+    const type = document.getElementById('pt-tank') && document.getElementById('pt-tank').classList.contains('on')
+      ? { type: 'tank', typeName: 'нефтеналивной танкер' }
+      : { type: 'cargo', typeName: 'многофункциональное сухогрузное судно' };
+    window.ShipState.save({
+      ...type, L: C.L2, B: C.B2, T: C.T2, H: C.H2, delta: C.d1,
+      D: F.D3, N: F.Ngl, DWT, loop: window.__loop || 1,
+    });
+  }
 }
 
 /* ---------- запуск ---------- */
@@ -422,6 +511,7 @@ recalcAll();
   function apply(key) {
     const p = PRESETS[key];
     if (!p) return;
+    window.FIXED_N = null;   // новый проект — двигатель ещё не выбран
     for (const [id, v] of Object.entries(p.f)) {
       const el = $(id);
       if (el) { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }

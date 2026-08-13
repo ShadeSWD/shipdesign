@@ -155,7 +155,11 @@
   корпуса с такими элементами — исследовать на
   <a href="https://shadeswd.duckdns.org/shipstat/solver">«Статике корабля»</a>.</div>
 </main>
+<script src="assets/ship-state.js"></script>
 <script src="assets/site.js" data-root="./" data-page="hullform"></script>
 <script src="assets/hull.js"></script>
+<script>
+if (window.ShipState) ShipState.apply({'hf-L':'L','hf-B':'B','hf-T':'T','hf-H':'H'});
+</script>
 </body>
 </html>
