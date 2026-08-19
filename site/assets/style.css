@@ -198,3 +198,10 @@ svg.geo-board { max-width: 100%; height: auto; }
 .controls select, .controls input[type=number] { max-width: 100%; }
 main .readout, main .caption, main .small { overflow-wrap: anywhere; }
 main .note div, main .note span, main .steps div, main .out div { overflow-wrap: anywhere; }
+
+/* таблица виджета многокритериального выбора (relmet-choice.js) */
+table.el { width: 100%; border-collapse: collapse; font: 14.5px system-ui, sans-serif; margin: 12px 0; }
+table.el th, table.el td { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: center; vertical-align: middle; }
+table.el th:first-child, table.el td:first-child { text-align: left; }
+table.el th { background: var(--chip); font-weight: 600; }
+.relmet-box input[type=number] { font: 13.5px system-ui, sans-serif; padding: 3px 5px; border: 1px solid var(--line); border-radius: 6px; }
