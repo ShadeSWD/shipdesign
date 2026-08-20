@@ -18,7 +18,17 @@
         { h: 't-power', k: 'theory', t: '5. Ходкость и установка' },
         { h: 't-econ', k: 'theory', t: '6. Экономика и энергоэффективность' },
       ] },
-      { t: 'Задачи', h: 'solver', drop: [
+      { t: 'Разборы', h: 'tasks', k: 'tasks', drop: [
+        { h: 'tasks', k: 'tasks', t: 'Оглавление разборов' },
+        { h: 'p-mass', k: 'tasks', t: '1. Уравнение масс' },
+        { h: 'p-dims', k: 'tasks', t: '2. Главные размерения' },
+        { h: 'p-hold', k: 'tasks', t: '3. Вместимость' },
+        { h: 'p-power', k: 'tasks', t: '4. Мощность и ходкость' },
+        { h: 'p-stab', k: 'tasks', t: '5. Плавучесть и остойчивость' },
+        { h: 'p-flood', k: 'tasks', t: '6. Непотопляемость' },
+        { h: 'p-econ', k: 'tasks', t: '7. Экономика рейса' },
+      ] },
+      { t: 'Расчёты', h: 'solver', drop: [
         { h: 'solver', k: 'solver', t: 'Главные элементы судна' },
         { h: 'hullform', k: 'hullform', t: 'Теоретический чертёж' },
         { h: 'arrangement', k: 'arrangement', t: 'Общее расположение' },

@@ -1,5 +1,5 @@
 @import url("base.css");
-/* Начертательная геометрия — стиль сайта */
+/* Проектирование судов — стиль сайта */
 :root {
   --bg: #eff3f9;
   --paper: #ffffff;
@@ -49,3 +49,71 @@ table.el th, table.el td { border-bottom: 1px solid var(--line); padding: 6px 8p
 table.el th:first-child, table.el td:first-child { text-align: left; }
 table.el th { background: var(--chip); font-weight: 600; }
 .relmet-box input[type=number] { font: 13.5px system-ui, sans-serif; padding: 3px 5px; border: 1px solid var(--line); border-radius: 6px; }
+.relmet-box table.el th, .relmet-box table.el td { text-align: center; vertical-align: middle; }
+.relmet-box table.el th:first-child, .relmet-box table.el td:first-child { text-align: left; }
+
+/* ============ разборы задач (p-*.html) ============ */
+
+/* таблицы данных: прокрутка живёт в обёртке, а не у самой таблицы —
+   иначе браузер завышает scrollWidth всей страницы и она едет вбок */
+.tbl-scroll { overflow-x: auto; margin: 14px 0; }
+.tbl-scroll > table { display: table; }
+table.data { border-collapse: collapse; font: 14px/1.45 system-ui, sans-serif; background: var(--paper); }
+table.data caption { caption-side: top; text-align: left; font: 600 14px system-ui, sans-serif; color: var(--muted); padding: 4px 0; }
+table.data th, table.data td { border: 1px solid var(--line); padding: 5px 10px; text-align: center; white-space: nowrap; }
+table.data th { background: var(--chip); font-weight: 600; }
+table.data td.l, table.data th.l { text-align: left; white-space: normal; }
+table.data tr.hl td { background: #e6efff; }
+table.data td.bad { background: #fbe7e5; color: #9c2b22; font-weight: 600; }
+table.data tr.tot td { font-weight: 700; border-top: 2px solid var(--line); }
+
+/* «коротко» — сводка ответов в начале разбора */
+.tldr { background: #eef3fb; border: 1px solid #ccd9ef; border-radius: 12px; padding: 12px 16px; margin: 18px 0; }
+.tldr h2, .tldr h3 { margin: 0 0 6px; font-size: 17px; font-family: system-ui, sans-serif; color: var(--accent); }
+.tldr ul { margin: 6px 0 0; padding-left: 20px; }
+.tldr li { margin: 4px 0; }
+
+/* исходные данные */
+.given { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin: 12px 0; }
+.given b { color: var(--accent); }
+.given ul { margin: 6px 0; padding-left: 20px; }
+
+/* шаг решения */
+.step { margin: 16px 0; padding-left: 16px; border-left: 3px solid var(--chip); }
+.step > h3 { margin-top: 0; color: var(--accent); }
+
+/* ответ */
+.answer { background: #eaf5ec; border: 1px solid #bcdcc6; border-left: 4px solid var(--green); border-radius: 10px; padding: 12px 16px; margin: 18px 0; }
+.answer h2, .answer h3 { margin: 0 0 6px; font-size: 17px; font-family: system-ui, sans-serif; color: #17632f; }
+
+/* цепочка «формула = подстановка = результат» — главный кирпич разборов */
+.chain { display: block; margin: 6px 0; font: 15px/1.6 ui-monospace, Consolas, monospace; background: var(--chip); border-radius: 8px; padding: 6px 12px; overflow-x: auto; }
+.answer .chain { background: #ffffffcc; }
+.chain .sub { color: var(--muted); }
+.chain.bad { background: #fbe7e5; color: #9c2b22; }
+.chain.bad .sub { color: #b3554c; }
+
+/* вопросы для самопроверки */
+details.q { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; margin: 8px 0; }
+details.q > summary { cursor: pointer; font: 600 15px system-ui, sans-serif; color: #26262e; }
+details.q > summary::marker { color: var(--accent); }
+details.q p { font-size: 15px; margin: 8px 0 2px; }
+
+/* врезка «источники разбора» */
+.srcbox { background: #f7f8fa; border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; margin: 22px 0 8px; font-size: 15px; }
+.srcbox h2 { margin-top: 4px; font-size: 19px; }
+.srcbox ul { margin: 6px 0; padding-left: 20px; }
+
+/* пометки первичности источника */
+.src-1, .src-2 { display: inline-block; border-radius: 999px; padding: 1px 9px; margin-right: 6px; font: 600 12px system-ui, sans-serif; vertical-align: 2px; }
+.src-1 { background: #e3f2e7; color: #17632f; border: 1px solid #bcdcc6; }
+.src-2 { background: #eef1f6; color: #4a4a56; border: 1px solid #d5dae4; }
+
+/* карточки-ссылки в оглавлении разборов */
+a.card { text-decoration: none; color: inherit; display: flex; flex-direction: column; }
+a.card:hover { border-color: var(--accent); }
+a.card .go { margin-top: auto; padding-top: 8px; font-family: system-ui, sans-serif; font-size: 14px; color: var(--link); }
+
+/* длинные неразрывные строки (сырой LaTeX до отрисовки KaTeX, адреса) не
+   должны распирать страницу на узком экране */
+main p, main li, main td, main th, .chain { overflow-wrap: break-word; }
